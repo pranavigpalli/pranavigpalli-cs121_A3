@@ -5,7 +5,6 @@ from nltk.stem import PorterStemmer
 from pathlib import Path
 from collections import defaultdict
 import os
-import lxml
 from bs4 import BeautifulSoup
 
 nltk.download('punkt')
@@ -27,8 +26,24 @@ def process_file(file_path, stemmer):
         return stemmed_tokens
 
 def write_index_to_file(index, file_path):
-    with open(file_path, 'a', encoding='utf-8') as file:
-        json.dump(index, file)
+    if os.path.exists(file_path):
+        with open(file_path, 'r', encoding='utf-8') as file:
+            existing_index = json.load(file)
+    else:
+        existing_index = {}
+
+    for token, postings in index.items():
+        if token in existing_index:
+            for doc_id, freq in postings.items():
+                if doc_id in existing_index[token]:
+                    existing_index[token][doc_id] += freq
+                else:
+                    existing_index[token][doc_id] = freq
+        else:
+            existing_index[token] = postings
+
+    with open(file_path, 'w', encoding='utf-8') as file:
+        json.dump(existing_index, file)
 
 def create_report(num_docs, unique_words, index_size, report_path):
     with open(report_path, 'w', encoding='utf-8') as file:
@@ -38,7 +53,7 @@ def create_report(num_docs, unique_words, index_size, report_path):
 
 def build_inverted_index(input_dir):
     stemmer = PorterStemmer()
-    inverted_index = defaultdict(list)
+    inverted_index = defaultdict(dict)
     doc_count = 0
     unique_words = set()
     index_file_path = 'inverted_index.json'
@@ -49,7 +64,9 @@ def build_inverted_index(input_dir):
 
     for folder in Path(input_dir).iterdir():
         if folder.is_dir():
+            folder_name = folder.name
             for file in folder.iterdir():
+                print(f"{folder_name}/{file.name}")
                 if file.is_file() and file.suffix == '.json':
                     doc_count += 1
                     tokens = process_file(file, stemmer)
@@ -58,8 +75,8 @@ def build_inverted_index(input_dir):
                         token_freq[token] += 1
                         unique_words.add(token)
                     for token, freq in token_freq.items():
-                        inverted_index[token].append((file.name, freq))
-                    if doc_count % 3 == 0:
+                        inverted_index[token][file.name] = freq
+                    if doc_count % 5000 == 0:
                         write_index_to_file(inverted_index, index_file_path)
                         inverted_index.clear()
 
