@@ -10,8 +10,12 @@ from bs4 import BeautifulSoup
 
 nltk.download('punkt')
 
-def tokenize(text):
+#  tokenize() takes in a string/text and uses regex to filter out all possible tokens from that text, in lower case form.
+#  Returns all tokens found.
+#  Time Complexity: 
+def tokenize(text): 
     return re.findall(r'\b\w+\b', text.lower())
+
 
 def stem_tokens(tokens, stemmer):
     return [stemmer.stem(token) for token in tokens]
