@@ -5,6 +5,7 @@ from nltk.stem import PorterStemmer
 from pathlib import Path
 from collections import defaultdict
 import os
+import lxml
 from bs4 import BeautifulSoup
 
 nltk.download('punkt')
@@ -27,8 +28,7 @@ def process_file(file_path, stemmer):
 
 def write_index_to_file(index, file_path):
     with open(file_path, 'a', encoding='utf-8') as file:
-        for token, postings in index.items():
-            file.write(f"{token}: {postings}\n")
+        json.dump(index, file)
 
 def create_report(num_docs, unique_words, index_size, report_path):
     with open(report_path, 'w', encoding='utf-8') as file:
@@ -41,7 +41,7 @@ def build_inverted_index(input_dir):
     inverted_index = defaultdict(list)
     doc_count = 0
     unique_words = set()
-    index_file_path = 'inverted_index.txt'
+    index_file_path = 'inverted_index.json'
     report_file_path = 'report.txt'
 
     if os.path.exists(index_file_path):
@@ -70,4 +70,4 @@ def build_inverted_index(input_dir):
     create_report(doc_count, len(unique_words), index_size, report_file_path)
 
 if __name__ == "__main__":
-    build_inverted_index('ANALYST')
+    build_inverted_index('DEV')
