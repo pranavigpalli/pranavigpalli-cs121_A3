@@ -56,17 +56,38 @@ def create_report(num_docs, unique_words, index_size, report_path):
         file.write("Total size of the index on disk (KB): {:.2f}\n".format(index_size / 1024))
 
 def build_inverted_index(input_dir):
+	# This function takes in an input directory containing the
+	# documents we need to process.
+    # Overall Time Complexity: O(n*m*T), where n = num subdirectories, m = num files/subdirectory, T = num tokens in file
+
     stemmer = PorterStemmer()
+	# Creates a PorterStemmer instance to stem words.
+
     inverted_index = defaultdict(dict)
+	# This initializes an inverted index as a defaultdict
+	# with a default value of an empty list. 
+	# The keys are expected to be stemmed words, and the values
+	# are lists of tuples with filename and frequency for word
+	# frequencies. 
+
     doc_count = 0
+	# doc_count is initialized as 0 and this variable tracks
+	# how many documents are being processed.
+
     unique_words = set()
+	# unique_words is a set storing unique words found in all the documents. 
+
     index_file_path = 'inverted_index.json'
+	# This is the path storing our inverted index
+
     report_file_path = 'report.txt'
+	# This is the path storing our summary report to write
 
     if os.path.exists(index_file_path):
         os.remove(index_file_path)
+	# This if statement checks if our inverted index file exists already, and if it does, it deletes the
+	# existing file to start over. 
 
-    #Time complexity for overall nested for loop O(n*m*T), where n = num subdirectories, m = num files/subdirectory, T = num tokens in file
     #Lists all the files and directories in input_dir
     # O(n), where n = number of subdirectories in input_dir
     for folder in Path(input_dir).iterdir():
@@ -106,9 +127,15 @@ def build_inverted_index(input_dir):
 
     if inverted_index:
         write_index_to_file(inverted_index, index_file_path)
+	# This checks if there is remaining data in inverted_index
+	# If there is data, it writes everything into index_file_path
+	# by calling write_index_to_file
 
     index_size = os.path.getsize(index_file_path)
+	# This retrieves the size in bytes of inverted_index.json after writing into it
+
     create_report(doc_count, len(unique_words), index_size, report_file_path)
+	# This calls create_report, which generates our final report
 
 if __name__ == "__main__":
     build_inverted_index('DEV')
