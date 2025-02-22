@@ -51,18 +51,41 @@ def build_inverted_index(input_dir):
     if os.path.exists(index_file_path):
         os.remove(index_file_path)
 
+    #Time complexity for overall nested for loop O(n*m*T), where n = num subdirectories, m = num files/subdirectory, T = num tokens in file
+    #Lists all the files and directories in input_dir
+    # O(n), where n = number of subdirectories in input_dir
     for folder in Path(input_dir).iterdir():
+        
+	    #Only allows the directories to pass through
+	    # O(m), where m = number of files per subdirectory
         if folder.is_dir():
+
+            #Lists all files in the directory
             for file in folder.iterdir():
+
+                #Only allows the .json files to pass through
                 if file.is_file() and file.suffix == '.json':
+
+                    #doc_count is incremented for each file processed
                     doc_count += 1
+
+                    #Tokenize the text in the file
                     tokens = process_file(file, stemmer)
+                    #Create a tracker for each token’s frequency
                     token_freq = defaultdict(int)
+
+                    #Count token frequency 
+                    # O(T), where T is the number of tokens in the file
                     for token in tokens:
                         token_freq[token] += 1
                         unique_words.add(token)
+
+                    #For each token we add an entry to the inverted_index which tracks info about the tokens
+                    # O(U), where U = number of unique tokens in the file
                     for token, freq in token_freq.items():
                         inverted_index[token].append((file.name, freq))
+
+                    #Every 5000 tokens we write the current inverted_index to a file and clear the memory
                     if doc_count % 3 == 0:
                         write_index_to_file(inverted_index, index_file_path)
                         inverted_index.clear()
