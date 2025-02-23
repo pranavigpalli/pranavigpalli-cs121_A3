@@ -1,32 +1,43 @@
-import re
-import nltk
-import json
-from nltk.stem import PorterStemmer
-from pathlib import Path
-from collections import defaultdict
-import os
-from bs4 import BeautifulSoup
+import re		# regex, for filtering out tokens
+import nltk	    # natural language toolkit, for nltk.stem and nltk.download(‘punkt’)
+import json	    # json, for data storage
+import os		# os, for checking if a file exists
+from nltk.stem import PorterStemmer		# PorterStemmer, for Porter stemming
+from pathlib import Path		        # Path, for processing files and directories
+from collections import defaultdict		# defaultdict, for our inverted index
+from bs4 import BeautifulSoup		    # BeautifulSoup, to turn text into a soup object
 
-nltk.download('punkt')
+nltk.download('punkt')      # to increase speed of creating the index
 
-#  tokenize() takes in a string/text and uses regex to filter out all possible tokens from that text, in lower case form.
-#  Returns all tokens found.
-#  Time Complexity: 
+#	tokenize() takes in a string/text and uses regex to filter out all 
+#   possible tokens from that text, in lowercase form. returns all tokens found.
+#	Time Complexity: O(n)
 def tokenize(text): 
     return re.findall(r'\b\w+\b', text.lower())
 
-
+#	stem_tokens() takes the tokens and a PorterStemmer, and returns 
+#   a list of the stem words from every token.  
+#	Time Complexity: O(n * k), where k is the average token length, 
+#   and n is the amount of tokens 
 def stem_tokens(tokens, stemmer):
     return [stemmer.stem(token) for token in tokens]
 
+#	process_file() takes a file path and the PorterStemmer, and opens the file, 
+#	turn its content into a json, turns that content into a soup object, retrieves its text, 
+#	tokenizes it, and then turns the tokens into stemmed tokens and returns that.
+#	Time Complexity: O(f + 2h + r + n * k), where:
+#   f is file size, 
+#   n is number of tokens
+#   h is the. length of HTML content
+#   r is the length of the text
 def process_file(file_path, stemmer):
-    with open(file_path, 'r', encoding='utf-8') as file:
-        data = json.load(file)
+    with open(file_path, 'r', encoding='utf-8') as file:    #	O(f)
+        data = json.load(file)  #	O(f)
         content = data['content']
-        soup = BeautifulSoup(content, 'lxml')
-        text = soup.get_text()
-        tokens = tokenize(text)
-        stemmed_tokens = stem_tokens(tokens, stemmer)
+        soup = BeautifulSoup(content, 'lxml')   #	O(h)
+        text = soup.get_text()      #	O(h)
+        tokens = tokenize(text)     #	O(r)
+        stemmed_tokens = stem_tokens(tokens, stemmer)   #	O(n * k)
         return stemmed_tokens
 
 def write_index_to_file(index, file_path):
