@@ -40,26 +40,41 @@ def process_file(file_path, stemmer):
         stemmed_tokens = stem_tokens(tokens, stemmer)   #	O(n * k)
         return stemmed_tokens
 
+
+# updates an inverted index stored in a JSON file.
+# Time complexity is worst case O(ND) given:
+# D be the number of documents per token
+# N be the number of tokens already in existing_index
+# This only occurs if every token is unique, so the real
+# time complexity will be lower
 def write_index_to_file(index, file_path):
+    # checks if file exists
     if os.path.exists(file_path):
         with open(file_path, 'r', encoding='utf-8') as file:
             existing_index = json.load(file)
     else:
         existing_index = {}
 
+    # merge new index with existing one
     for token, postings in index.items():
         if token in existing_index:
             for doc_id, freq in postings.items():
                 if doc_id in existing_index[token]:
+                    # if the document exists, add the frequency
                     existing_index[token][doc_id] += freq
                 else:
                     existing_index[token][doc_id] = freq
         else:
+            # if a token is new, add it to existing_index
             existing_index[token] = postings
 
+    # write the updated index back to the file.
     with open(file_path, 'w', encoding='utf-8') as file:
         json.dump(existing_index, file)
 
+# generates a simple text report about the indexing process.
+# O(1) time complexity as it simply writes the already
+# processed variables into the report document
 def create_report(num_docs, unique_words, index_size, report_path):
     with open(report_path, 'w', encoding='utf-8') as file:
         file.write("Number of indexed documents: {}\n".format(num_docs))
