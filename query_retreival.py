@@ -30,6 +30,23 @@ def stem_query(query):
     tokens = word_tokenize(query.lower())
     return [stemmer.stem(token) for token in tokens]
 
+def get_tf_idf_vectors(query_tokens, inverted_index):
+    doc_vectors = defaultdict(lambda: [0] * len(query_tokens))
+    query_vector = [0] * len(query_tokens)
+    N = len(inverted_index)
+
+    for i, token in enumerate(query_tokens):
+        if token in inverted_index:
+            df = len(inverted_index[token])
+            idf = math.log(N / (df + 1))  # Avoid division by zero
+            query_vector[i] = idf
+
+            for doc_id, (url, tf) in inverted_index[token].items():
+                doc_vectors[doc_id][i] = tf * idf
+
+    return query_vector, doc_vectors
+
+
 def rank_documents(query_tokens, inverted_index):
     pass
 
