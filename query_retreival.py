@@ -34,7 +34,26 @@ def rank_documents(query_tokens, inverted_index):
     pass
 
 def process_query(query, inverted_index):
-    pass
+    start_time = time.time()
+    
+    query_tokens = stem_query(query)
+    ranked_docs = rank_documents(query_tokens, inverted_index)
+    
+    end_time = time.time()
+    response_time = end_time - start_time
+
+    results = []
+    for score, doc_id in ranked_docs:
+        for token in query_tokens:
+            if doc_id in inverted_index.get(token, {}):
+                url = inverted_index[token][doc_id][0]
+                results.append((url, score))
+                break
+
+    # sort results by score in descending order and limit to top 20
+    results = sorted(results, key=lambda x: x[1], reverse=True)[:20]
+
+    return results, response_time
 
 def main():
     pass
