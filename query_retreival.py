@@ -95,10 +95,7 @@ def process_query(query, inverted_index):
                 url = inverted_index[token][doc_id][0]
                 results.append((url, score))
                 break
-
-    # sort results by score in descending order and limit to top 20
-    results = sorted(results, key=lambda x: x[1], reverse=True)[:20]
-
+    
     return results, response_time
 
 def warm_up():
@@ -109,14 +106,16 @@ def main():
     # Warm up before taking real queries
     warm_up()
 
+    print("\nWelcome to the search engine!\n")
+
     while True:
-        query = input("Enter your query: ")
+        query = input("Enter your query (type 'exit' to quit the program): ")
         if query == 'exit':
             break
         results, response_time = process_query(query, inverted_index)
         for url, score in results:
             print(f"\t{url}")
-        print(f"Response time: {response_time:.5f} seconds")
+        print(f"Response time: {response_time:.5f} seconds\n")
 
 if __name__ == "__main__":
     main()
