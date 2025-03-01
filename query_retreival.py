@@ -101,8 +101,22 @@ def process_query(query, inverted_index):
 
     return results, response_time
 
+def warm_up():
+    """Run a dummy query to initialize everything."""
+    process_query("warm up query", inverted_index)
+
 def main():
-    pass
+    # Warm up before taking real queries
+    warm_up()
+
+    while True:
+        query = input("Enter your query: ")
+        if query == 'exit':
+            break
+        results, response_time = process_query(query, inverted_index)
+        for url, score in results:
+            print(f"\t{url}")
+        print(f"Response time: {response_time:.5f} seconds")
 
 if __name__ == "__main__":
     main()
