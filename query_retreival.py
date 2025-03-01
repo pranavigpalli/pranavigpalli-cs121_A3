@@ -6,7 +6,6 @@ from math import log10
 from collections import defaultdict
 from nltk.stem import PorterStemmer
 from nltk.tokenize import word_tokenize
-from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer
 import nltk
 
@@ -38,7 +37,7 @@ def get_tf_idf_vectors(query_tokens, inverted_index):
     for i, token in enumerate(query_tokens):
         if token in inverted_index:
             df = len(inverted_index[token])
-            idf = math.log(N / (df + 1))  # Avoid division by zero
+            idf = math.log(N / (df + 1))
             query_vector[i] = idf
 
             for doc_id, (url, tf) in inverted_index[token].items():
@@ -46,9 +45,39 @@ def get_tf_idf_vectors(query_tokens, inverted_index):
 
     return query_vector, doc_vectors
 
+def rank_documents(query_terms, inverted_idx):
+    top_k = 20
+    
+    term_postings_list = []
+    for term in query_terms:
+        if term in inverted_idx:
+            term_postings_list.append(inverted_idx[term])
 
-def rank_documents(query_tokens, inverted_index):
-    pass
+    doc_scores = {}
+    total_docs = len(inverted_idx)
+    initial_idf = None
+    for i in range(len(term_postings_list)):
+        postings = term_postings_list[i]
+        num_docs_with_term = len(postings)
+        if num_docs_with_term > 0:
+            idf_value = log10(total_docs / num_docs_with_term)
+            if initial_idf is None:
+                initial_idf = idf_value
+            # Exclude terms that are too common, prioritize terms that are more unique
+            if idf_value >= initial_idf / 3:
+                for doc_id, (url, term_freq) in postings.items():
+                    log_tf = log10(1 + term_freq)
+                    doc_scores[doc_id] = log_tf * idf_value + doc_scores.get(doc_id, 0)
+
+    min_heap_scores = []  # min-heap to keep track of top k scores
+    for doc_id in doc_scores:
+        score = doc_scores[doc_id]
+        heapq.heappush(min_heap_scores, (score, doc_id))
+        if len(min_heap_scores) > top_k:
+            heapq.heappop(min_heap_scores)
+
+    ranked_documents = sorted(min_heap_scores, reverse=True)
+    return ranked_documents
 
 def process_query(query, inverted_index):
     start_time = time.time()
