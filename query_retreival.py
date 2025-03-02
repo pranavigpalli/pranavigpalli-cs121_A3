@@ -119,5 +119,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-    # trying to open this on my own device locally on vscode
