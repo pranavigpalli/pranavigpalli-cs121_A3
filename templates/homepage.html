@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JPAGE Home</title>
+    <!--<link rel="stylesheet" type="text/css" href="./styles.css" > -->
+    <style> 
+        body {
+            background-color: #0A1128;
+            }
+
+        h1   {
+            color: #FEFCFB;
+            font-family: Helvetica;
+            font-style: italic
+            }
+        p    {
+            color: #FEFCFB;
+            font-family: Helvetica;
+            font-style: italic
+            }
+        label {
+            font-family: Helvetica;
+            }
+
+        .home-box {
+            position: fixed; /* This makes the box float */
+            top: 50%; /* 50% from the top of the screen */
+            left: 50%; /* 50% from the left of the screen */
+            transform: translate(-50%, -50%); /* Adjusts to center the box exactly */
+            width: 400px; /* Set width of box */
+            padding: 20px;
+            background-color: #001F54; /* Semi-transparent background */
+            color: #FEFCFB;
+            border-radius: 10px;
+            text-align: center;    
+            font-family: Helvetica;
+            }
+    </style>
+</head>
+
+<body>
+    <div class="home-box">
+        <h1>JPAGE Search Engine</h1>
+        <form action="/searching/search-results">
+            <label>
+                <input type="text" name="query" placeholder="Enter your search query...">
+            </label>
+            <button type="Enter">Search</button> 
+        </form>
+        <p>for inf 141 and cs 121</p>
+        <p>made by jasmyn, pranavi, audrey, gauresh, and emily</p>
+    </div>
+</body>
+</html>
