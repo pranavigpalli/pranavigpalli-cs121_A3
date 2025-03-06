@@ -29,6 +29,9 @@ vectorizer = TfidfVectorizer()
 # Warm-up NLTK tokenizer
 word_tokenize("test query")
 
+with open("stop_words.txt") as f:
+    stop_words = set(f.read().split())
+
 def stem_query(query):
     tokens = word_tokenize(query.lower())
     return [stemmer.stem(token) for token in tokens]
@@ -93,6 +96,9 @@ def process_query(query, inverted_index):
     start_time = time.time()
 
     query_tokens = word_tokenize(query.lower())
+
+    if len(query_tokens) >= 5:
+        query_tokens = [token for token in query_tokens if token not in stop_words]
 
     corrected_tokens = []
     for token in query_tokens:
