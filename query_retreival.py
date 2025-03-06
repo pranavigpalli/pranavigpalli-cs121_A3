@@ -6,8 +6,12 @@ from math import log10
 from collections import defaultdict
 from nltk.stem import PorterStemmer
 from nltk.tokenize import word_tokenize
+from textblob import Word
 from sklearn.feature_extraction.text import TfidfVectorizer
 import nltk
+
+# threshold for close matches
+THRESHOLD = 60
 
 # Download NLTK data
 nltk.download('punkt')
@@ -79,24 +83,49 @@ def rank_documents(query_terms, inverted_idx):
     ranked_documents = sorted(min_heap_scores, reverse=True)
     return ranked_documents
 
+def get_closest_match(query_word, index):\
+    corrected_word = Word(query_word).correct()
+    if corrected_word in index:
+        return corrected_word
+    return None
+
 def process_query(query, inverted_index):
     start_time = time.time()
-    
-    query_tokens = stem_query(query)
-    ranked_docs = rank_documents(query_tokens, inverted_index)
-    
+
+    query_tokens = word_tokenize(query.lower())
+
+    corrected_tokens = []
+    for token in query_tokens:
+        if token in inverted_index:
+            corrected_tokens.append(token)
+        else:
+            closest_match = get_closest_match(token, inverted_index)
+            if closest_match:
+                corrected_tokens.append(closest_match)
+
+    if not corrected_tokens:
+        print("No valid terms found in query.")
+        return [], 0
+
+    stemmed_tokens = [stemmer.stem(token) for token in corrected_tokens]
+
+    print(f"Processed Query Terms: {stemmed_tokens}")
+
+    ranked_docs = rank_documents(stemmed_tokens, inverted_index)
+
     end_time = time.time()
     response_time = end_time - start_time
 
     results = []
     for score, doc_id in ranked_docs:
-        for token in query_tokens:
+        for token in stemmed_tokens:
             if doc_id in inverted_index.get(token, {}):
                 url = inverted_index[token][doc_id][0]
                 results.append((url, score))
                 break
-    
+
     return results, response_time
+
 
 def warm_up():
     """Run a dummy query to initialize everything."""
