@@ -83,7 +83,7 @@ def rank_documents(query_terms, inverted_idx):
     ranked_documents = sorted(min_heap_scores, reverse=True)
     return ranked_documents
 
-def get_closest_match(query_word, index):\
+def get_closest_match(query_word, index):
     corrected_word = Word(query_word).correct()
     if corrected_word in index:
         return corrected_word
