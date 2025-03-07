@@ -90,29 +90,28 @@ def get_closest_match(query_word, index):
     corrected_word = Word(query_word).correct()
     if corrected_word in index:
         return corrected_word
-    return None
+    return query_word  # Instead of returning None, return original word if no correction is found
+
 
 def process_query(query, inverted_index):
     start_time = time.time()
-
+    
     query_tokens = word_tokenize(query.lower())
-
+    
+    # Remove stop words if query is long
     if len(query_tokens) >= 5:
         query_tokens = [token for token in query_tokens if token not in stop_words]
 
     corrected_tokens = []
     for token in query_tokens:
-        if token in inverted_index:
-            corrected_tokens.append(token)
-        else:
-            closest_match = get_closest_match(token, inverted_index)
-            if closest_match:
-                corrected_tokens.append(closest_match)
+        corrected_token = get_closest_match(token, inverted_index)
+        corrected_tokens.append(corrected_token)
 
     if not corrected_tokens:
         print("No valid terms found in query.")
         return [], 0
 
+    # Stem all corrected tokens
     stemmed_tokens = [stemmer.stem(token) for token in corrected_tokens]
 
     print(f"Processed Query Terms: {stemmed_tokens}")
@@ -131,6 +130,7 @@ def process_query(query, inverted_index):
                 break
 
     return results, response_time
+
 
 
 def warm_up():
