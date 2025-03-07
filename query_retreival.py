@@ -53,7 +53,7 @@ def get_tf_idf_vectors(query_tokens, inverted_index):
     return query_vector, doc_vectors
 
 def rank_documents(query_terms, inverted_idx):
-    top_k = 20
+    top_k = 10
     
     term_postings_list = []
     for term in query_terms:
@@ -87,11 +87,13 @@ def rank_documents(query_terms, inverted_idx):
     return ranked_documents
 
 def get_closest_match(query_word, index):
-    corrected_word = Word(query_word).correct()
-    if corrected_word in index:
-        return corrected_word
-    return query_word  # Instead of returning None, return original word if no correction is found
-
+    if query_word in index:
+        return query_word
+    else:
+        corrected_word = Word(query_word).correct()
+        if corrected_word in index:
+            return corrected_word
+    return None
 
 def process_query(query, inverted_index):
     start_time = time.time()
@@ -102,8 +104,12 @@ def process_query(query, inverted_index):
     if len(query_tokens) >= 5:
         query_tokens = [token for token in query_tokens if token not in stop_words]
 
+    # Stem all tokens
+    stemmed_tokens = [stemmer.stem(token) for token in query_tokens]
+
+    # Handle misspellings
     corrected_tokens = []
-    for token in query_tokens:
+    for token in stemmed_tokens:
         corrected_token = get_closest_match(token, inverted_index)
         corrected_tokens.append(corrected_token)
 
@@ -111,19 +117,16 @@ def process_query(query, inverted_index):
         print("No valid terms found in query.")
         return [], 0
 
-    # Stem all corrected tokens
-    stemmed_tokens = [stemmer.stem(token) for token in corrected_tokens]
+    print(f"Processed Query Terms: {corrected_tokens}")
 
-    print(f"Processed Query Terms: {stemmed_tokens}")
-
-    ranked_docs = rank_documents(stemmed_tokens, inverted_index)
+    ranked_docs = rank_documents(corrected_tokens, inverted_index)
 
     end_time = time.time()
     response_time = end_time - start_time
 
     results = []
     for score, doc_id in ranked_docs:
-        for token in stemmed_tokens:
+        for token in corrected_tokens:
             if doc_id in inverted_index.get(token, {}):
                 url = inverted_index[token][doc_id][0]
                 results.append((url, score))
