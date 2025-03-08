@@ -119,7 +119,7 @@ def process_query(query):
         print("No valid terms found in query.")
         return [], 0
 
-    print(f"Processed Query Terms: {corrected_tokens}")
+    # print(f"Processed Query Terms: {corrected_tokens}")  # debugging statement
 
     ranked_docs = rank_documents(corrected_tokens)
 
