@@ -1,3 +1,6 @@
 DEV/
 .DS_Store
 inverted_index.json
+index/
+doc_id_url.txt
+token_locations_in_index.json

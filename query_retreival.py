@@ -1,20 +1,27 @@
 import json
 import time
 import heapq
-import math
 from math import log10
 from collections import defaultdict
 from nltk.stem import PorterStemmer
 from nltk.tokenize import word_tokenize
+from textblob import Word
 from sklearn.feature_extraction.text import TfidfVectorizer
 import nltk
 
 # Download NLTK data
 nltk.download('punkt')
 
-# Load the inverted index from the JSON file
-with open('inverted_index.json', 'r', encoding='utf-8') as file:
-    inverted_index = json.load(file)
+# Load the token locations from the JSON file
+with open('token_locations_in_index.json', 'r', encoding='utf-8') as file:
+    token_locations_in_index = json.load(file)
+
+# Load the doc_id to URL mapping
+doc_id_url = {}
+with open('doc_id_url.txt', 'r', encoding='utf-8') as file:
+    for line in file:
+        doc_id, url = line.strip().split(', ')
+        doc_id_url[doc_id] = url
 
 # Initialize the stemmer
 stemmer = PorterStemmer()
@@ -25,82 +32,110 @@ vectorizer = TfidfVectorizer()
 # Warm-up NLTK tokenizer
 word_tokenize("test query")
 
+with open("stop_words.txt") as f:
+    stop_words = set(f.read().split())
+
 def stem_query(query):
     tokens = word_tokenize(query.lower())
     return [stemmer.stem(token) for token in tokens]
 
-def get_tf_idf_vectors(query_tokens, inverted_index):
-    doc_vectors = defaultdict(lambda: [0] * len(query_tokens))
-    query_vector = [0] * len(query_tokens)
-    N = len(inverted_index)
+def get_postings(token):
+    first_letter = token[0]
+    file_path = f'index/{first_letter.upper()}.txt'
+    if token in token_locations_in_index:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            file.seek(token_locations_in_index[token])
+            line = file.readline().strip()
+            if ': ' in line:
+                try:
+                    return json.loads(line.split(': ', 1)[1])
+                except json.JSONDecodeError:
+                    print(f"Error decoding JSON for token: {token}")
+                    return {}
+    return {}
 
-    for i, token in enumerate(query_tokens):
-        if token in inverted_index:
-            df = len(inverted_index[token])
-            idf = math.log(N / (df + 1))
-            query_vector[i] = idf
-
-            for doc_id, (url, tf) in inverted_index[token].items():
-                doc_vectors[doc_id][i] = tf * idf
-
-    return query_vector, doc_vectors
-
-def rank_documents(query_terms, inverted_idx):
-    top_k = 20
-    
-    term_postings_list = []
-    for term in query_terms:
-        if term in inverted_idx:
-            term_postings_list.append(inverted_idx[term])
-
+def rank_documents(query_terms):
+    top_k = 10
     doc_scores = {}
-    total_docs = len(inverted_idx)
+    total_docs = len(doc_id_url)
     initial_idf = None
-    for i in range(len(term_postings_list)):
-        postings = term_postings_list[i]
+
+    for term in query_terms:
+        postings = get_postings(term)
         num_docs_with_term = len(postings)
-        if num_docs_with_term > 0:
-            idf_value = log10(total_docs / num_docs_with_term)
-            if initial_idf is None:
-                initial_idf = idf_value
-            # Exclude terms that are too common, prioritize terms that are more unique
-            if idf_value >= initial_idf / 3:
-                for doc_id, (url, term_freq) in postings.items():
-                    log_tf = log10(1 + term_freq)
-                    doc_scores[doc_id] = log_tf * idf_value + doc_scores.get(doc_id, 0)
+        if num_docs_with_term == 0:
+            continue
 
-    min_heap_scores = []  # min-heap to keep track of top k scores
-    for doc_id in doc_scores:
-        score = doc_scores[doc_id]
-        heapq.heappush(min_heap_scores, (score, doc_id))
-        if len(min_heap_scores) > top_k:
-            heapq.heappop(min_heap_scores)
+        idf_value = log10(total_docs / num_docs_with_term)
+        if not initial_idf:
+            initial_idf = idf_value
+        elif idf_value < initial_idf / 2:
+            continue
 
-    ranked_documents = sorted(min_heap_scores, reverse=True)
+        for doc_id, (freq, importance) in postings.items():
+            log_tf = log10(freq + 1)
+            score = log_tf * idf_value
+            if importance == 1:
+                score *= 2  # Boost score for important text
+            doc_scores[doc_id] = doc_scores.get(doc_id, 0) + score
+
+    priority_queue = []
+    for doc_id, score in doc_scores.items():
+        heapq.heappush(priority_queue, (score, doc_id))
+        if len(priority_queue) > top_k:
+            heapq.heappop(priority_queue)
+
+    ranked_documents = sorted(priority_queue, reverse=True)
     return ranked_documents
 
-def process_query(query, inverted_index):
+def get_closest_match(query_word):
+    if query_word in token_locations_in_index:
+        return query_word
+    else:
+        corrected_word = Word(query_word).correct()
+        if corrected_word in token_locations_in_index:
+            return corrected_word
+    return None
+
+def process_query(query):
     start_time = time.time()
     
-    query_tokens = stem_query(query)
-    ranked_docs = rank_documents(query_tokens, inverted_index)
+    query_tokens = word_tokenize(query.lower())
     
+    # Remove stop words if query is long
+    if len(query_tokens) >= 5:
+        query_tokens = [token for token in query_tokens if token not in stop_words]
+
+    # Stem all tokens
+    stemmed_tokens = [stemmer.stem(token) for token in query_tokens]
+
+    # Handle misspellings
+    corrected_tokens = []
+    for token in stemmed_tokens:
+        corrected_token = get_closest_match(token)
+        corrected_tokens.append(corrected_token)
+
+    if not corrected_tokens:
+        print("No valid terms found in query.")
+        return [], 0
+
+    # print(f"Processed Query Terms: {corrected_tokens}")  # debugging statement
+
+    ranked_docs = rank_documents(corrected_tokens)
+
     end_time = time.time()
     response_time = end_time - start_time
 
     results = []
     for score, doc_id in ranked_docs:
-        for token in query_tokens:
-            if doc_id in inverted_index.get(token, {}):
-                url = inverted_index[token][doc_id][0]
-                results.append((url, score))
-                break
-    
+        url = doc_id_url[doc_id]
+        results.append((url, score))
+
     return results, response_time
 
 def warm_up():
     """Run a dummy query to initialize everything."""
-    process_query("warm up query", inverted_index)
+    process_query("warm up query")
 
 def main():
     # Warm up before taking real queries
@@ -112,7 +147,7 @@ def main():
         query = input("Enter your query (type 'exit' to quit the program): ")
         if query == 'exit':
             break
-        results, response_time = process_query(query, inverted_index)
+        results, response_time = process_query(query)
         for url, score in results:
             print(f"\t{url}")
         print(f"Response time: {response_time:.5f} seconds\n")
