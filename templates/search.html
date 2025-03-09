@@ -59,6 +59,10 @@
             font-size: 25px;
             font-family: Helvetica;
         }
+        .results {
+            padding: 100px 0;
+        }
+
     </style>
 </head>
 <body>
@@ -67,9 +71,18 @@
             <div class="search-container">
                 <a href="/searching"> <img src="https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg" class="logo"> </a>
                 <input type="text" name="query" placeholder="{{query}}" class="search-bar">
-                <h3>Found _{{amount}}_ results in _{{ms}}_ ms</h3>
-            </div> 
+                <h3>Found results in {{ time }} ms</h3>
+                
+            </div>
+            
         </h1>
+        
     </div>
+    <div class="results"> 
+        {% for result in results %}
+            <p> - {{result[0]}} </p>
+        {% endfor %}
+     </div>
+    
 </body>
 </html>
