@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JPAGE Results</title>
+    <style>
+        body {
+            background-color: #0A1128;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1   {
+            color: #FEFCFB;
+            font-family: Helvetica;
+            border-bottom: 1px solid #FEFCFB; 
+            padding-bottom: 20px 0;
+            position: absolute;
+            top: 10;
+            left: 20;
+            width: 100%;
+        }
+
+        h2   {
+            color: #FEFCFB;
+            font-family: Helvetica; /** h2 isn't being used **/
+        }
+
+        h3   {
+            color: #FEFCFB;
+            font-family: Helvetica;
+            font-size: 15px;   
+        }
+
+        p   {
+            color: #FEFCFB;
+            font-family: Helvetica;
+            font-style: italic
+        } 
+
+        .logo { 
+            width: 125px; 
+            height: auto;
+        }
+
+        .header {
+            padding: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: left;
+            width: 100%;
+        }
+
+        .search-container {
+            gap: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            
+        }
+
+        .search-bar {
+            font-size: 25px;
+            font-family: Helvetica;
+        }
+        .results {
+            padding: 100px 0;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>
+            <div class="search-container">
+                <a href="/searching"> <img src="https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg" class="logo"> </a>
+                <form action="/searching/search-results">
+                <label> 
+                    <input type="text" name="query" placeholder="{{query}}" class="search-bar">
+                    <button type="Enter">Enter New Search</button>
+                </label>
+            </form>
+                <h3>Found results in {{ time }} seconds</h3>
+        </h1>
+        
+    </div>
+
+    <div class="results"> 
+        <h2> Top Results: </h2>
+        {% for result in results %}
+            <p> - {{result[0]}} </p>
+        {% endfor %}
+     </div>
+</body>
+</html>

@@ -1,3 +1,4 @@
+## FOR M3, OPTIMIZED VERSION OF INVERTED_INDEX
 import re
 import nltk
 import json
