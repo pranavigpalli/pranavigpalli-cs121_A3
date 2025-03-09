@@ -152,5 +152,11 @@ def main():
             print(f"\t{url}")
         print(f"Response time: {response_time:.5f} seconds\n")
 
+def main_three(query):
+    # for M3's UI
+    warm_up()
+    results, response_time = process_query(query, inverted_index)
+    return results, response_time
+
 if __name__ == "__main__":
     main()
