@@ -23,6 +23,17 @@ with open('doc_id_url.txt', 'r', encoding='utf-8') as file:
         doc_id, url = line.strip().split(', ')
         doc_id_url[doc_id] = url
 
+# Load the inverted index from the JSON file
+with open('inverted_index.json', 'r', encoding='utf-8') as file:
+    inverted_index = json.load(file)
+
+# Load precomputed results
+try:
+    with open('precomputed_results.json', 'r', encoding='utf-8') as file:
+        precomputed_results = json.load(file)
+except FileNotFoundError:
+    precomputed_results = {}
+
 # Initialize the stemmer for reducing words to their root forms 
 stemmer = PorterStemmer()
 
@@ -107,6 +118,11 @@ def get_closest_match(query_word):
 def process_query(query):
     """Processes the user's query by tokenizing, stemming, handling misspellings, and ranking results."""
     start_time = time.time() # Start timing query processing
+
+    # If the search query is precomputed, it's fetched from cache
+    if query in precomputed_results:
+        print("Fetching query results from cache...")
+        return precomputed_results[query], 0
     
     query_tokens = word_tokenize(query.lower()) # Tokenize and lowercase query
     
