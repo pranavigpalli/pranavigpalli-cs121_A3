@@ -20,7 +20,7 @@ First, ensure you have a folder named "index" that is either empty or has previo
 Ensure the steps for M1 are already completed. Open the terminal and type "python query_retreival.py". Then enter your searches or type exit to end the searching. This code uses the inverted index from M1 to return the top 10 URLs that match the entered query.
 
 ### M3: Completed Search Engine
-Ensure the steps for M1 and M2 are completed. Open the terminal and type "python app.py". Then, go to http://127.0.0.1:8000/searching after running the previous command. Here, you can enter your query and view the top 10 results from your search. Some features we have to optimize our search engine include:
+Repeat the steps for M1 using "inverted_index_m3" instead. Complete the steps for M2 as well. Open the terminal and type "python app.py". Then, go to http://127.0.0.1:8000/searching after running the previous command. Here, you can enter your query and view the top 10 results from your search. Some features we have to optimize our search engine include:
 - closest term matching for mispelled words or rare terms using TextBlob
 - increasing the weight of words in page titles using an updated inverted index
 - using stop words filtering for long queries
