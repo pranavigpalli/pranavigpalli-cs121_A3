@@ -24,8 +24,8 @@ with open('doc_id_url.txt', 'r', encoding='utf-8') as file:
         doc_id_url[doc_id] = url
 
 # Load the inverted index from the JSON file
-with open('inverted_index.json', 'r', encoding='utf-8') as file:
-    inverted_index = json.load(file)
+# with open('inverted_index.json', 'r', encoding='utf-8') as file:
+#     inverted_index = json.load(file)
 
 # Load precomputed results
 try:
