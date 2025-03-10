@@ -180,8 +180,7 @@ def main():
 
 def main_three(query):
     """Handles query processing for M3's UI by returning search results."""
-    # for M3's UI
-    warm_up()
+    warm_up()  # Warm up before taking real queries
     results, response_time = process_query(query)
     return results, response_time
 

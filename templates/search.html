@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JPAGE Results</title>
-    <style>
+    <title>JPAGE Results</title> 
+    <style> /** for result page styling **/
         body {
             background-color: #0A1128;
             margin: 0;
@@ -75,21 +75,21 @@
     <div class="header">
         <h1>
             <div class="search-container">
-                <a href="/searching"> <img src="https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg" class="logo"> </a>
+                <a href="/searching"> <img src="https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg" class="logo"> </a> /** random image used, original logo wouldn't work **/
                 <form action="/searching/search-results">
                 <label> 
                     <input type="text" name="query" placeholder="{{query}}" class="search-bar">
                     <button type="Enter">Enter New Search</button>
                 </label>
             </form>
-                <h3>Found results in {{ time }} seconds</h3>
+                <h3>Found results in {{ time }} seconds</h3> 
         </h1>
         
     </div>
 
     <div class="results"> 
         <h2> Top Results: </h2>
-        {% for result in results %}
+        {% for result in results %} /** Printing out all results **/
             <p> - {{result[0]}} </p>
         {% endfor %}
      </div>
