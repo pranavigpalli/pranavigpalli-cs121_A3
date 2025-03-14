@@ -75,7 +75,7 @@
     <div class="header">
         <h1>
             <div class="search-container">
-                <a href="/searching"> <img src="https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg" class="logo"> </a> /** random image used, original logo wouldn't work **/
+                <a href="/searching"> <img src="https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg" class="logo"> </a>
                 <form action="/searching/search-results">
                 <label> 
                     <input type="text" name="query" placeholder="{{query}}" class="search-bar">
@@ -89,7 +89,7 @@
 
     <div class="results"> 
         <h2> Top Results: </h2>
-        {% for result in results %} /** Printing out all results **/
+        {% for result in results %}
             <p> - {{result[0]}} </p>
         {% endfor %}
      </div>
