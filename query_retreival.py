@@ -68,18 +68,18 @@ def rank_documents(query_terms):
 
     for term in query_terms:
         postings = get_postings(term)  # Retrieve documents containing the term
-        num_docs_with_term = len(postings)  # Get the number of documents containing the term
-        if num_docs_with_term == 0:
+        df = len(postings)  # Get the number of documents containing the term
+        if df == 0:
             continue # Skip terms that are not in the index
 
-        idf_value = log10(total_docs / num_docs_with_term) # Compute IDF
+        idf_value = log10(total_docs / df) # Compute IDF
         if not initial_idf:
             initial_idf = idf_value
         elif idf_value < initial_idf / 2:
             continue # Skip terms with very low IDF meaning too common
 
         for doc_id, (freq, importance) in postings.items():
-            log_tf = log10(freq + 1) # Compute log(TF)
+            log_tf = 1 + log10(freq) # Compute 1 + log(TF)
             score = log_tf * idf_value  # Compute TF-IDF score
             if importance == 1:
                 score *= 2  # Boost score for important text
@@ -113,7 +113,10 @@ def process_query(query):
     # If the search query is precomputed, it's fetched from cache
     if query in precomputed_results:
         print("Fetching query results from cache...")
-        return precomputed_results[query], 0
+        result = precomputed_results[query]
+        end_time = time.time()  # Stop timing query processing
+        response_time = round((end_time - start_time) * 1000, 3)
+        return result, response_time # Return cached results and query response time
     
     query_tokens = word_tokenize(query.lower()) # Tokenize and lowercase query
     
