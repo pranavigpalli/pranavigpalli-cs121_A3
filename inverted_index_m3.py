@@ -11,8 +11,6 @@ from bs4 import XMLParsedAsHTMLWarning  # Warning filter for parsing XML
 import warnings
 warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
 
-nltk.download('punkt') # Download NLTK tokenizer data
-
 # tokenize() extracts all word tokens from a given text using regex.
 # It converts all tokens to lowercase to maintain consistency.
 # Time Complexity: O(n), where n is the number of characters in the text.
@@ -43,7 +41,7 @@ def process_file(file_path, stemmer):
         data = json.load(file)
         content = data['content']
         url = data['url']  # Extract the URL from the JSON file
-        soup = BeautifulSoup(content, 'lxml') # Parse HTML
+        soup = BeautifulSoup(content, 'lxml') # Parse XML
         text = soup.get_text() # Extract text content
         tokens = tokenize(text) # Tokenize text
         stemmed_tokens = stem_tokens(tokens, stemmer) # Apply stemming
@@ -54,12 +52,6 @@ def process_file(file_path, stemmer):
             important_tokens.update(stem_tokens(tokenize(tag.get_text()), stemmer))
 
         return stemmed_tokens, important_tokens, url  # Return tokens, important tokens, and URL
-
-# is_important() checks if an HTML tag is considered important for weighting in ranking.
-# It helps prioritize headers and bold text for search relevance.
-# Time Complexity: O(1) (Checking a fixed set)
-def is_important(tag):
-    return tag.name in ['b', 'strong', 'h1', 'h2', 'h3', 'title']
 
 # write_index_to_files() saves the inverted index to separate files by first letter.
 # If a file exists, it merges new postings with the existing data.
