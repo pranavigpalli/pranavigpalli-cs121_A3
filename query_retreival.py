@@ -148,7 +148,7 @@ def process_query(query):
     ranked_docs = rank_documents(corrected_tokens)
 
     end_time = time.time()  # Stop timing query processing
-    response_time = end_time - start_time
+    response_time = round((end_time - start_time) * 1000, 3)
 
     # Format the search results with URLs and scores
     results = []
@@ -176,7 +176,7 @@ def main():
         results, response_time = process_query(query) # Process the user’s search query
         for url, score in results:
             print(f"\t{url}")
-        print(f"Response time: {response_time:.5f} seconds\n") # Show query execution time
+        print(f"Response time: {response_time:.5f} ms\n") # Show query execution time
 
 def main_three(query):
     """Handles query processing for M3's UI by returning search results."""
