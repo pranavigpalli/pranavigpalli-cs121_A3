@@ -2,11 +2,9 @@ import json
 import time
 import heapq
 from math import log10
-from collections import defaultdict
 from nltk.stem import PorterStemmer
 from nltk.tokenize import word_tokenize
 from textblob import Word
-from sklearn.feature_extraction.text import TfidfVectorizer
 import nltk
 
 # Download NLTK data
