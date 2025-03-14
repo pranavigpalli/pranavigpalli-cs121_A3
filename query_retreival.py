@@ -37,9 +37,6 @@ except FileNotFoundError:
 # Initialize the stemmer for reducing words to their root forms 
 stemmer = PorterStemmer()
 
-# Preload vectorizer to avoid fitting it multiple times used for TF-IDF calculations
-vectorizer = TfidfVectorizer()
-
 # Warm-up NLTK tokenizer ensures it's ready for use without initial delay
 word_tokenize("test query")
 
