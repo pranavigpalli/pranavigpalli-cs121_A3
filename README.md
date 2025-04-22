@@ -6,6 +6,7 @@ Pranavi Gollanapalli, Gauresh Gururaj, Audrey Lu, Emily Hames, Jasmyn Villanueva
 ## Background
 
 This is our search engine for CS 121 / INF 141 in Winter 2025 with Professor Iftekhar Ahmed.
+JPAGE Search Engine searches through 55,000+ HTML documents and has a query response time under 100ms.
 
 ## Dependencies
 
